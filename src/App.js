@@ -1,26 +1,52 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+// import logo from "./logo.svg";
+import "./App.css";
+import axios from "axios";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+  state = {
+    selectedFile: null
+  };
+
+  fileSelectedHandler = event => {
+    this.setState({
+      selectedFile: event.target.files[0]
+    });
+  };
+
+  fileUploadHandler = () => {
+    const fd = new FormData();
+    fd.append("image", this.state.selectedFile, this.state.selectedFile.name);
+    axios
+      .post("{url}", fd, {
+        //need to provide a correct {url} here
+        onUploadProgress: progressEvent => {
+          console.log(
+            "Upload Progress: " +
+              Math.round((progressEvent.loaded / progressEvent.total) * 100) +
+              "%"
+          );
+        }
+      })
+      .then(res => {
+        console.log(res);
+      });
+  };
+
+  render() {
+    return (
+      <div className="App">
+        <input
+          style={{ display: "none" }}
+          type="file"
+          onChange={this.fileSelectedHandler}
+          ref={fileInput => (this.fileInput = fileInput)}
+        />
+        <button onClick={() => this.fileInput.click()}>Choose File</button>
+        <button onClick={this.fileUploadHandler}>Upload</button>
+      </div>
+    );
+  }
 }
 
 export default App;
